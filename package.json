@@ -3,8 +3,8 @@
   "name": "lockbox",
   "version": "0.1.0-pre",
   "main": "dist/bootstrap.js",
-  "description": "A Lockbox extension for Firefox",
-  "author": "Lockbox Team <lockbox@mozilla.com>",
+  "description": "Improved password management for Firefox",
+  "author": "lockbox@mozilla.com",
   "engines": {
     "firefox": ">=54"
   },
@@ -24,8 +24,9 @@
     "addon"
   ],
   "scripts": {
+    "template-replace": "./bin/template-replace.py src/webextension/manifest-template.json src/webextension/manifest.json && ./bin/template-replace.py src/install-template.rdf src/install.rdf",
     "autolint": "eslint src test webpack*.js --ignore-pattern '!.eslintrc.js' .eslintrc.js",
-    "lint": "cross-env STRICT_LINT=1 npm run autolint --",
+    "lint": "npm run-script template-replace && cross-env STRICT_LINT=1 npm run autolint --",
     "prebuild": "npm run-script autolint",
     "build": "webpack",
     "prerun": "npm run-script build",
@@ -37,7 +38,8 @@
     "distclean": "git clean -dfX",
     "prepackage": "npm run-script clean && npm run-script build",
     "package": "mkdir -p build && cd dist && zip -r ../build/${npm_package_name}-${npm_package_version}.xpi *",
-    "release": "export NODE_ENV='production' && npm run-script package"
+    "release": "export NODE_ENV='production' && npm run-script package",
+    "releasesign": "npm run-script release && cd build && cp ${npm_package_name}-${npm_package_version}.xpi ${npm_package_name}-${npm_package_version}-unsigned.xpi && jpm sign --api-key ${npm_config_jwt_issuer} --api-secret ${npm_config_jwt_secret} --xpi ./${npm_package_name}-${npm_package_version}.xpi"
   },
   "nyc": {
     "all": true,
